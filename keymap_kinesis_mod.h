@@ -6,7 +6,7 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         TAB, Q,   W,   E,   R,   T,   FN2,
         ESC, A,   S,   D,   F,   G,
         LSFT,Z,   X,   C,   V,   B,   FN1,
-        LGUI,GRV, INS,LEFT,RGHT,
+        DEL, GRV, INS,LEFT,RGHT,
                                       LCTL,HOME,
                                             END,
                                  BSPC,LGUI, LALT,
@@ -14,7 +14,7 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              FN3, 6,   7,   8,   9,   0,   BSLS,
              LBRC,Y,   U,   I,   O,   P,   LBRC,
                   H,   J,   K,   L,   SCLN,QUOT,
-             FN1, N,   M,   COMM,DOT, SLSH,RSFT,
+             FN5, N,   M,   COMM,DOT, SLSH,RSFT,
                          UP,DOWN,MINS, EQL,RGUI,
         PGUP,RCTL,
         PGDN,
@@ -101,6 +101,7 @@ static const uint16_t PROGMEM fn_actions[] = {
     ACTION_LAYER_SET(2, ON_PRESS),                  // FN2 - set Layer2
     ACTION_LAYER_TOGGLE(3),                         // FN3 - toggle Layer3 aka Numpad layer
     ACTION_LAYER_SET(0, ON_PRESS),                  // FN4 - set Layer0
+    ACTION_LAYER_MOMENTARY(1),                      // FN5 - set Layer1 momentarily
 };
 
 void action_function(keyrecord_t *event, uint8_t id, uint8_t opt)
