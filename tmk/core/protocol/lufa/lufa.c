@@ -176,6 +176,7 @@ void EVENT_USB_Device_Disconnect(void)
 void EVENT_USB_Device_Reset(void)
 {
     print("[R]");
+    USB_IsInitialized = false;
 }
 
 void EVENT_USB_Device_Suspend()
