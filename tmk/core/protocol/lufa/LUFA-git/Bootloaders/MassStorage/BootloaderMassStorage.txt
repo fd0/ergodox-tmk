@@ -62,9 +62,17 @@
  *
  *  \section Sec_Running Running the Bootloader
  *
- *  This bootloader is designed to be started via the HWB mechanism of the USB AVRs; ground the HWB pin (see device
- *  datasheet) then momentarily ground /RESET to start the bootloader. This assumes the HWBE fuse is set and the BOOTRST
- *  fuse is cleared.
+ *  On the USB AVR8 devices, setting the \c HWBE device fuse will cause the bootloader to run if the \c HWB pin of
+ *  the AVR is grounded when the device is reset.
+ *
+ *  The are two behaviours of this bootloader, depending on the device's fuses:
+ *
+ *  <b>If the device's BOOTRST fuse is set</b>, the bootloader will run any time the system is reset from
+ *  the external reset pin, unless no valid user application has been loaded. To initiate the bootloader, the
+ *  device's external reset pin should be grounded momentarily.
+ *
+ *  <b>If the device's BOOTRST fuse is not set</b>, the bootloader will run only if initiated via a software
+ *  jump, or if the \c HWB pin was low during the last device reset (if the \c HWBE fuse is set).
  *
  *  For board specific exceptions to the above, see below.
  *
@@ -88,7 +96,20 @@
  *  remove your device from the host using the host OS's ejection APIs, to ensure all data is correctly flushed to the
  *  bootloader's virtual filesystem and not cached in the OS's file system driver.
  *
- *  The current device firmware can be read from the device by reading a file from the virtual FAT filesystem.
+ *  The current device firmware can be read from the device by reading a file from the virtual FAT filesystem. Two files will
+ *  be present:
+ *    - <b>FLASH.BIN</b>, representing the AVR's internal flash memory
+ *    - <b>EEPROM.BIN</b>, representing the AVR's internal EEPROM memory
+ *
+ *  To convert an existing Intel HEX (.HEX) program file to a binary (.BIN) file suitable for this bootloader, run:
+ *    \code
+ *		avr-objcopy -O binary -R .eeprom -R .fuse -R .lock -R .signature input.hex output.bin
+ *    \endcode
+ *  From a terminal, replacing <tt>input.hex</tt> and <tt>output.bin</tt> with the respective input and output filenames.
+ *  AVR EEPROM data files in Intel HEX format (.EEP) uses a similar technique:
+ *    \code
+ *		avr-objcopy -O binary input.eep output.bin
+ *    \endcode
  *
  *  \warning This bootloader is currently <b>incompatible with the Apple MacOS X OS Finder GUI</b>, due to the
  *           large amount of meta files this OS attempts to write to the disk along with the new binaries. On
@@ -197,12 +218,6 @@
  *  operation of the bootloader. Write caching should be disabled when using the
  *  Mass Storage bootloader, or the file system synced via an appropriate command
  *  (such as the OS's normal disk ejection command) before disconnecting the device.
- *
- *  \par After loading an application, it is not run automatically on startup.
- *  Some USB AVR boards ship with the BOOTRST fuse set, causing the bootloader
- *  to run automatically when the device is reset. In most cases, the BOOTRST
- *  fuse should be disabled and the HWBE fuse used instead to run the bootloader
- *  when needed.
  *
  *  \section Sec_Options Project Options
  *

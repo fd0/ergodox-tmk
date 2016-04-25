@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2014.
+     Copyright (C) Dean Camera, 2015.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2014  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2015  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -59,6 +59,9 @@
 
 		/** DHCP option list entry header, indicating that a subnet mask will follow. */
 		#define DHCP_OPTION_SUBNETMASK    1
+
+		/** DHCP option list entry header, indicating that the Lease Time will follow. */
+		#define DHCP_OPTION_LEASETIME     51
 
 		/** DHCP option list entry header, indicating that the DHCP message type constant will follow. */
 		#define DHCP_OPTION_MESSAGETYPE   53

@@ -6,6 +6,34 @@
 
  /** \page Page_ChangeLog Project Changelog
   *
+  *  \section Sec_ChangeLog151115 Version 151115
+  *  <b>New:</b>
+  *   - Added support for the Atmel Xplained-MINI series of development kits
+  *   - Added new PROGMEM variant send functions to the CDC class device driver (thanks to Stefan Hellermann)
+  *   - Added new PROGMEM variant send functions to the CDC class host driver
+  *   - Added additional Arduino Uno board definitions for the main processor reset (thanks to NicoHood)
+  *   - Added modified DocBook transforms to generate Atmel Studio 6/7 internal help documentation (thanks to Morten Engelhardt Olsen)
+  *
+  *  <b>Changed:</b>
+  *  - Core:
+  *   - The TWI peripheral driver's TWI_WritePacket() and TWI_ReadPacket() functions now takes a 16-bit Length rather than an 8-bit
+  *     length, for longer transfers
+  *  - Library Applications:
+  *   - The CDC, DFU, Mass Storage and Printer class bootloaders will no longer run the user application if the application reset
+  *     vector is blank (thanks to Alex Kazik)
+  *   - The CDC, DFU and Printer class bootloaders are now compatible with the original Atmel XPLAIN and Arduino Leonardo boards
+  *   - The CDC, DFU, Mass Storage and Printer class bootloaders are not compatible with devices with the BOOTRST fuse set and will
+  *     exit automatically unless an external reset was the last reset cause (thanks to Alex Kazik)
+  *   - Added missing force-inline attribute to the endianness utility functions (thanks to Stefan Hellermann)
+  *   - Updated the DFU build system module to use updated EEPROM programming command arguments for dfu-programmer 0.6.2 or newer
+  *
+  *  <b>Fixed:</b>
+  *   - Fixed broken XMEGA serial stream driver due to missing USART base pointer parameter (thanks to William Patterson)
+  *   - Fixed incorrect signature reported in the CDC/DFU bootloaders for the AT90USB82 (thanks to NicoHood)
+  *   - Fixed broken RNDIS demos on Linux machines whose DHCP hosts require a Lease Time option (thanks to Stefan Hellermann)
+  *   - Fixed broken LEDs_Disable() implementation for the Arduino Uno board (thanks to NicoHood)
+  *   - Fixed missing bounds checks and off-by-one in the DFU bootloader signature bytes (thanks to Reuti)
+  *
   *  \section Sec_ChangeLog140928 Version 140928
   *  <b>New:</b>
   *  - Core:

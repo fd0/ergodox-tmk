@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2014.
+     Copyright (C) Dean Camera, 2015.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2014  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2015  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -108,7 +108,17 @@ void Application_Jump_Check(void)
 {
 	bool JumpToApplication = false;
 
-	#if ((BOARD == BOARD_XPLAIN) || (BOARD == BOARD_XPLAIN_REV1))
+	#if (BOARD == BOARD_LEONARDO)
+		/* Enable pull-up on the IO13 pin so we can use it to select the mode */
+		PORTC |= (1 << 7);
+		Delay_MS(10);
+
+		/* If IO13 is not jumpered to ground, start the user application instead */
+		JumpToApplication = ((PINC & (1 << 7)) != 0);
+
+		/* Disable pull-up after the check has completed */
+		PORTC &= ~(1 << 7);
+	#elif ((BOARD == BOARD_XPLAIN) || (BOARD == BOARD_XPLAIN_REV1))
 		/* Disable JTAG debugging */
 		JTAG_DISABLE();
 
@@ -117,21 +127,41 @@ void Application_Jump_Check(void)
 		Delay_MS(10);
 
 		/* If the TCK pin is not jumpered to ground, start the user application instead */
-		JumpToApplication |= ((PINF & (1 << 4)) != 0);
+		JumpToApplication = ((PINF & (1 << 4)) != 0);
 
 		/* Re-enable JTAG debugging */
 		JTAG_ENABLE();
+	#else
+		/* Check if the device's BOOTRST fuse is set */
+		if (boot_lock_fuse_bits_get(GET_HIGH_FUSE_BITS) & FUSE_BOOTRST)
+		{
+			/* If the reset source was not an external reset or the key is correct, clear it and jump to the application */
+			if (!(MCUSR & (1 << EXTRF)) || (MagicBootKey == MAGIC_BOOT_KEY))
+			  JumpToApplication = true;
+
+			/* Clear reset source */
+			MCUSR &= ~(1 << EXTRF);
+		}
+		else
+		{
+			/* If the reset source was the bootloader and the key is correct, clear it and jump to the application;
+			 * this can happen in the HWBE fuse is set, and the HBE pin is low during the watchdog reset */
+			if ((MCUSR & (1 << WDRF)) && (MagicBootKey == MAGIC_BOOT_KEY))
+				JumpToApplication = true;
+
+			/* Clear reset source */
+			MCUSR &= ~(1 << WDRF);
+		}
 	#endif
 
-	/* If the reset source was the bootloader and the key is correct, clear it and jump to the application */
-	if ((MCUSR & (1 << WDRF)) && (MagicBootKey == MAGIC_BOOT_KEY))
-	  JumpToApplication |= true;
+	/* Don't run the user application if the reset vector is blank (no app loaded) */
+	bool ApplicationValid = (pgm_read_word_near(0) != 0xFFFF);
 
 	/* If a request has been made to jump to the user application, honor it */
-	if (JumpToApplication)
+	if (JumpToApplication && ApplicationValid)
 	{
 		/* Turn off the watchdog */
-		MCUSR &= ~(1<<WDRF);
+		MCUSR &= ~(1 << WDRF);
 		wdt_disable();
 
 		/* Clear the boot key and jump to the user application */
@@ -751,8 +781,9 @@ static void ProcessWriteCommand(void)
 			}
 			else                                                               // Start via jump
 			{
-				/* Set the flag to terminate the bootloader at next opportunity */
-				RunBootloader = false;
+				/* Set the flag to terminate the bootloader at next opportunity if a valid application has been loaded */
+				if (pgm_read_word_near(0) == 0xFFFF)
+				  RunBootloader = false;
 			}
 		}
 	}
@@ -787,18 +818,43 @@ static void ProcessReadCommand(void)
 	const uint8_t BootloaderInfo[3] = {BOOTLOADER_VERSION, BOOTLOADER_ID_BYTE1, BOOTLOADER_ID_BYTE2};
 	const uint8_t SignatureInfo[4]  = {0x58, AVR_SIGNATURE_1, AVR_SIGNATURE_2, AVR_SIGNATURE_3};
 
-	uint8_t DataIndexToRead = SentCommand.Data[1];
+	uint8_t DataIndexToRead    = SentCommand.Data[1];
+	bool    ReadAddressInvalid = false;
 
 	if (IS_ONEBYTE_COMMAND(SentCommand.Data, 0x00))                        // Read bootloader info
 	{
-		ResponseByte = BootloaderInfo[DataIndexToRead];
+		if (DataIndexToRead < 3)
+		  ResponseByte = BootloaderInfo[DataIndexToRead];
+		else
+		  ReadAddressInvalid = true;
 	}
 	else if (IS_ONEBYTE_COMMAND(SentCommand.Data, 0x01))                    // Read signature byte
 	{
-		if (DataIndexToRead < 0x60)
-		  ResponseByte = SignatureInfo[DataIndexToRead - 0x30];
-		else
-		  ResponseByte = SignatureInfo[DataIndexToRead - 0x60 + 3];
+		switch (DataIndexToRead)
+		{
+			case 0x30:
+				ResponseByte = SignatureInfo[0];
+				break;
+			case 0x31:
+				ResponseByte = SignatureInfo[1];
+				break;
+			case 0x60:
+				ResponseByte = SignatureInfo[2];
+				break;
+			case 0x61:
+				ResponseByte = SignatureInfo[3];
+				break;
+			default:
+				ReadAddressInvalid = true;
+				break;
+		}
+	}
+
+	if (ReadAddressInvalid)
+	{
+		/* Set the state and status variables to indicate the error */
+		DFU_State  = dfuERROR;
+		DFU_Status = errADDRESS;
 	}
 }
 

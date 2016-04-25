@@ -59,9 +59,17 @@
  *
  *  \section Sec_Running Running the Bootloader
  *
- *  This bootloader is designed to be started via the HWB mechanism of the USB AVRs; ground the HWB pin (see device
- *  datasheet) then momentarily ground /RESET to start the bootloader. This assumes the HWBE fuse is set and the BOOTRST
- *  fuse is cleared.
+ *  On the USB AVR8 devices, setting the \c HWBE device fuse will cause the bootloader to run if the \c HWB pin of
+ *  the AVR is grounded when the device is reset.
+ *
+ *  The are two behaviours of this bootloader, depending on the device's fuses:
+ *
+ *  <b>If the device's BOOTRST fuse is set</b>, the bootloader will run any time the system is reset from
+ *  the external reset pin, unless no valid user application has been loaded. To initiate the bootloader, the
+ *  device's external reset pin should be grounded momentarily.
+ *
+ *  <b>If the device's BOOTRST fuse is not set</b>, the bootloader will run only if initiated via a software
+ *  jump, or if the \c HWB pin was low during the last device reset (if the \c HWBE fuse is set).
  *
  *  For board specific exceptions to the above, see below.
  *
@@ -195,12 +203,6 @@
  *  inserted CDC devices. Root privileges or a UDEV rule is required to gain
  *  access.
  *  See <a href=https://groups.google.com/d/msg/lufa-support/CP9cy2bc8yo/kBqsOu-RBeMJ>here</a> for resolution steps.
- *
- *  \par After loading an application, it is not run automatically on startup.
- *  Some USB AVR boards ship with the BOOTRST fuse set, causing the bootloader
- *  to run automatically when the device is reset. In most cases, the BOOTRST
- *  fuse should be disabled and the HWBE fuse used instead to run the bootloader
- *  when needed.
  *
  *  \section Sec_Options Project Options
  *

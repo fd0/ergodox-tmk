@@ -1,13 +1,13 @@
 /*
              LUFA Library
-     Copyright (C) Dean Camera, 2014.
+     Copyright (C) Dean Camera, 2015.
 
   dean [at] fourwalledcubicle [dot] com
            www.lufa-lib.org
 */
 
 /*
-  Copyright 2014  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2015  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -206,7 +206,7 @@ void DataflashManager_ReadBlocks(const uint32_t BlockAddress,
 	{
 		uint8_t BytesInBlockDiv16 = 0;
 
-		/* Write an endpoint packet sized data block to the Dataflash */
+		/* Read an endpoint packet sized data block from the Dataflash */
 		while (BytesInBlockDiv16 < (VIRTUAL_MEMORY_BLOCK_SIZE >> 4))
 		{
 			/* Check if the endpoint is currently full */
@@ -413,7 +413,7 @@ void DataflashManager_ReadBlocks_RAM(const uint32_t BlockAddress,
 	{
 		uint8_t BytesInBlockDiv16 = 0;
 
-		/* Write an endpoint packet sized data block to the Dataflash */
+		/* Read an endpoint packet sized data block from the Dataflash */
 		while (BytesInBlockDiv16 < (VIRTUAL_MEMORY_BLOCK_SIZE >> 4))
 		{
 			/* Check if end of Dataflash page reached */
