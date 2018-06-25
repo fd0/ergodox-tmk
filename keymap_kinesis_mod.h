@@ -3,7 +3,7 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KEYMAP(  // layer 0 : default
         // left hand
         RBRC,1,   2,   3,   4,   5,  PAUS,
-        TAB, Q,   W,   E,   R,   T,   FN2,
+        TAB, Q,   W,   E,   R,   T,    NO,
         ESC, A,   S,   D,   F,   G,
         LSFT,Z,   X,   C,   V,   B,   FN1,
         DEL, GRV, INS,LEFT,RGHT,
@@ -11,8 +11,8 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                             END,
                                  BSPC,LGUI, LALT,
         // right hand
-             FN3, 6,   7,   8,   9,   0,   BSLS,
-             LBRC,Y,   U,   I,   O,   P,   LBRC,
+             NO,  6,   7,   8,   9,   0,   BSLS,
+             NO,  Y,   U,   I,   O,   P,   LBRC,
                   H,   J,   K,   L,   SCLN,QUOT,
              FN5, N,   M,   COMM,DOT, SLSH,RSFT,
                          UP,DOWN,MINS, EQL,RGUI,
@@ -23,25 +23,26 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     KEYMAP(  // layer 1 : function and symbol keys
         // left hand
-        TRNS,F1,  F2,  F3,  F4,  F5,  F11,
-        TRNS,TRNS,TRNS,WH_U,TRNS,TRNS,FN4,
-        TRNS,TRNS,WH_L,WH_D,WH_R,TRNS,
-        TRNS,TRNS,TRNS,MS_D,MS_U,TRNS,FN4,
-        TRNS,TRNS,TRNS,MS_L,MS_R,
-                                      TRNS,ACL2,
-                                           ACL1,
-                                  DEL,TRNS,ACL0,
+        F11 ,F1,  F2,  F3,  F4,  F5,  F11,
+        TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,
+        TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,
+        TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,FN4,
+        TRNS,TRNS,TRNS,TRNS,TRNS,
+                                      TRNS,TRNS,
+                                           TRNS,
+                                  DEL,TRNS,TRNS,
         // right hand
-             F12, F6,  F7,  F8,  F9,  F10, TRNS,
-             TRNS,TRNS,PSCR,SLCK,PAUS,MS_R,TRNS,
-                  TRNS,MS_L,TRNS,TRNS,TRNS,TRNS,
+             F12, F6,  F7,  F8,  F9,  F10,  F12,
+             TRNS,TRNS,PSCR,SLCK,PAUS,TRNS,TRNS,
+                  TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,
              TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,
-                       MS_U,MS_D,TRNS,TRNS,TRNS,
+                       TRNS,TRNS,TRNS,TRNS,TRNS,
         TRNS,TRNS,
         TRNS,
-        BTN1,BTN2,BTN3
+        TRNS,TRNS,TRNS
     ),
 
+    /*
     KEYMAP(  // layer 2 : keyboard functions
         // left hand
         FN0, TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,
@@ -84,6 +85,7 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         TRNS,TRNS,TRNS
     ),
 
+    */
 };
 
 /* id for user defined functions */
