@@ -39,29 +39,22 @@
 #----------------------------------------------------------------------------
 
 # Target file name (without extension).
-TARGET = ergodox_lufa
+TARGET ?= ergodox
 
 # Directory common source filess exist
-TMK_DIR = tmk/core
+TMK_DIR ?= tmk_core
 
 # Directory keyboard dependent files exist
-TARGET_DIR = .
-
-# project specific files
-SRC =	keymap.c \
-	matrix.c \
-	led.c \
-	ergodox.c \
-	twimaster.c
-
-CONFIG_H = config.h
+TARGET_DIR ?= .
 
 
-# MCU name, you MUST set this to match the board you are using
-# type "make clean" after changing this, so all files will be rebuilt
-MCU = atmega32u4
-#MCU = at90usb1286
+# List C source files here. (C dependencies are automatically generated.)
+SRC ?=	$(wildcard *.c)
 
+CONFIG_H ?= config.h
+
+# MCU name
+MCU ?= atmega32u4
 
 # Processor frequency.
 #     This will define a symbol, F_CPU, in all source code files equal to the
@@ -74,14 +67,14 @@ MCU = atmega32u4
 #     does not *change* the processor frequency - it should merely be updated to
 #     reflect the processor speed set externally so that the code can use accurate
 #     software delays.
-F_CPU = 16000000
+F_CPU ?= 16000000
 
 
 #
 # LUFA specific
 #
 # Target architecture (see library "Board Types" documentation).
-ARCH = AVR8
+ARCH ?= AVR8
 
 # Input clock frequency.
 #     This will define a symbol, F_USB, in all source code files equal to the
@@ -94,35 +87,66 @@ ARCH = AVR8
 #
 #     If no clock division is performed on the input clock inside the AVR (via the
 #     CPU clock adjust registers or the clock division fuses), this will be equal to F_CPU.
-F_USB = $(F_CPU)
+F_USB ?= $(F_CPU)
 
-# Interrupt driven control endpoint task(+60)
+# Interrupt driven control endpoint task
 OPT_DEFS += -DINTERRUPT_CONTROL_ENDPOINT
 
 
 # Boot Section Size in *bytes*
 #   Teensy halfKay   512
 #   Teensy++ halfKay 1024
-#   Atmel DFU loader 4096
+#   Atmel DFU loader 4096	(TMK Alt Controller)
 #   LUFA bootloader  4096
 #   USBaspLoader     2048
+#   fake teensy++ 2.0 4096
 OPT_DEFS += -DBOOTLOADER_SIZE=4096
 
 
 # Build Options
 #   comment out to disable the options.
 #
-BOOTMAGIC_ENABLE = yes	# Virtual DIP switch configuration(+1000)
-MOUSEKEY_ENABLE = yes	# Mouse keys(+4700)
-EXTRAKEY_ENABLE = yes	# Audio control and System control(+450)
-CONSOLE_ENABLE = yes	# Console for debug(+400)
-COMMAND_ENABLE = yes    # Commands for debug and configuration
-#SLEEP_LED_ENABLE = yes  # Breathing sleep LED during USB suspend
-NKRO_ENABLE = yes	# USB Nkey Rollover - not yet supported in LUFA
+#BOOTMAGIC_ENABLE ?= yes	# Virtual DIP switch configuration
+#MOUSEKEY_ENABLE ?= yes		# Mouse keys
+#EXTRAKEY_ENABLE ?= yes		# Audio control and System control
+#CONSOLE_ENABLE ?= yes		# Console for debug
+#COMMAND_ENABLE ?= yes    	# Commands for debug and configuration
+NKRO_ENABLE ?= yes		# USB Nkey Rollover
+#UNIMAP_ENABLE ?= yes		# Universal keymap
+#ACTIONMAP_ENABLE ?= yes	# Use 16bit actionmap instead of 8bit keymap
+#KEYMAP_SECTION_ENABLE ?= yes	# fixed address keymap for keymap editor
+
+#OPT_DEFS += -DNO_ACTION_TAPPING
+#OPT_DEFS += -DNO_ACTION_LAYER
+#OPT_DEFS += -DNO_ACTION_MACRO
 
 
-# Optimize size but this may cause error "relocation truncated to fit"
-#EXTRALDFLAGS = -Wl,--relax
+# Keymap file
+# KEYMAP_FILE = 
+# ifeq (yes,$(strip $(UNIMAP_ENABLE)))
+#     KEYMAP_FILE = unimap
+# else
+#     ifeq (yes,$(strip $(ACTIONMAP_ENABLE)))
+#         KEYMAP_FILE = actionmap
+#     else
+#         KEYMAP_FILE = keymap
+#     endif
+# endif
+# ifdef KEYMAP
+#     SRC := $(KEYMAP_FILE)_$(KEYMAP).c $(SRC)
+# else
+#     ifeq (yes,$(strip $(HHKB_JP)))
+#         SRC := $(KEYMAP_FILE)_jp.c $(SRC)
+#     else 
+#         SRC := $(KEYMAP_FILE)_hhkb.c $(SRC)
+#     endif
+# endif
+
+
+# ifneq (, $(or $(findstring keymap_jp.c, $(SRC)), $(findstring yes, $(HHKB_JP))))
+#     OPT_DEFS += -DHHKB_JP
+# endif
+
 
 # Search Path
 VPATH += $(TARGET_DIR)
@@ -132,11 +156,9 @@ include $(TMK_DIR)/protocol/lufa.mk
 include $(TMK_DIR)/common.mk
 include $(TMK_DIR)/rules.mk
 
-micro: OPT_DEFS += -DKEYMAP_MICRO
-micro: all
+debug-on: EXTRAFLAGS += -DDEBUG -DDEBUG_ACTION
+debug-on: all
 
-cub: OPT_DEFS += -DKEYMAP_CUB
-cub: all
-
-kinesis-mod: OPT_DEFS += -DKEYMAP_KINESIS_MOD -DSHOW_LAYER_LEDS
-kinesis-mod: all
+debug-off: EXTRAFLAGS += -DNO_DEBUG -DNO_PRINT
+debug-off: OPT_DEFS := $(filter-out -DCONSOLE_ENABLE,$(OPT_DEFS))
+debug-off: all

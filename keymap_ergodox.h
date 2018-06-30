@@ -1,6 +1,8 @@
-static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+const uint8_t keymaps[][MATRIX_ROWS][MATRIX_COLS] PROGMEM = {
 
-    KEYMAP(  // layer 0 : default
+    // layer 0 : default
+    [0] = \
+    KEYMAP(
         // left hand
         RBRC,1,   2,   3,   4,   5,  PAUS,
         TAB, Q,   W,   E,   R,   T,    NO,
@@ -21,7 +23,9 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         RALT,ENT, SPC
     ),
 
-    KEYMAP(  // layer 1 : function and symbol keys, teensy key
+    // layer 1 : function and symbol keys, teensy key
+    [1] = \
+    KEYMAP(
         // left hand
         F11 ,F1,  F2,  F3,  F4,  F5,  F11,
         TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,TRNS,
@@ -89,15 +93,12 @@ static const uint8_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 /* id for user defined functions */
-enum function_id {
-    TEENSY_KEY,
-};
-
+#define TEENSY_KEY 0
 
 /*
  * Fn action definition
  */
-static const uint16_t PROGMEM fn_actions[] = {
+const action_t fn_actions[] PROGMEM = {
     ACTION_FUNCTION(TEENSY_KEY),                    // FN0 - Teensy key
     ACTION_LAYER_SET(1, ON_PRESS),                  // FN1 - set Layer1
     ACTION_LAYER_SET(2, ON_PRESS),                  // FN2 - set Layer2
