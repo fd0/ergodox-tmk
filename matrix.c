@@ -68,12 +68,18 @@ uint8_t matrix_cols(void)
 
 void matrix_init(void)
 {
+    debug_config.enable = true;
+    //debug_config.matrix = true;
+    //debug_config.keyboard = true;
+    print("matrix_init()\n");
+
     // initialize row and col
     init_ergodox();
     mcp23018_status = init_mcp23018();
     ergodox_blink_all_leds();
     unselect_rows();
     init_cols();
+
 
     // initialize matrix state: all keys off
     for (uint8_t i=0; i < MATRIX_ROWS; i++) {
@@ -140,51 +146,6 @@ uint8_t matrix_scan(void)
             ergodox_right_led_3_on();
             break;
     }
-#endif
-
-#ifdef KEYMAP_CUB
-    uint8_t layer = biton32(layer_state);
-
-    ergodox_board_led_off();
-    ergodox_right_led_1_off();
-    ergodox_right_led_2_off();
-    ergodox_right_led_3_off();
-    switch (layer) {
-        case 1:
-            // no leds
-            break;
-        case 2:
-            // blue
-            ergodox_left_led_2_on();
-            break;
-        case 8:
-            // blue and green
-            ergodox_left_led_2_on();
-            // break missed intentionally
-        case 3:
-            // green
-            ergodox_left_led_3_on();
-            break;
-        case 6:
-            ergodox_board_led_on();
-            // break missed intentionally
-        case 4:
-        case 5:
-        case 7:
-            // white
-            ergodox_left_led_1_on();
-            break;
-        case 9:
-            // white+green
-            ergodox_left_led_1_on();
-            ergodox_left_led_3_on();
-            break;
-        default:
-            // none
-            break;
-    }
-
-    mcp23018_status = ergodox_left_leds_update();
 #endif
 
     for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
