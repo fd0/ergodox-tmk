@@ -1,0 +1,13 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/fd0/tmk_core
+	branch = handle-usb-reset
+	commit = bc495537598ba183dc7f9706944390cd54938753
+	parent = 563ad5b7a8eea06d4fe0e15854fc61b998403331
+	method = merge
+	update = auto
+	cmdver = 0.4.1
