@@ -41,9 +41,6 @@ Project located at <https://github.com/benblazak/ergodox-firmware>
 #define MOUSEKEY_MAX_SPEED      3
 #define MOUSEKEY_TIME_TO_MAX    10
 
-/* define if matrix has ghost */
-
-#define DEBOUNCE        4
 #define TAPPING_TERM    230
 
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */

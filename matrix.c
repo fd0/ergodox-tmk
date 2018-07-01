@@ -33,10 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include  "timer.h"
 #endif
 
-// matrix scan rate is usually between 2.8ms and 3.5ms, this configures how
-// many matrixs scans a key must have settled before a new state is accepted.
+// matrix scan rate is around 1.6ms, this configures how many matrixs scans a
+// key must have settled before a new state is accepted.
 #ifndef DEBOUNCE
-#   define DEBOUNCE 3
+#   define DEBOUNCE 7
 #endif
 
 #if DEBOUNCE < 1
