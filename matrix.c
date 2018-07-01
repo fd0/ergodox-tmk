@@ -294,18 +294,6 @@ static matrix_row_t read_cols(uint8_t row)
  */
 static void unselect_rows(void)
 {
-    // unselect on mcp23018
-    if (mcp23018_status) { // if there was an error
-        // do nothing
-    } else {
-        // set all rows hi-Z : 1
-        mcp23018_status = i2c_start(I2C_ADDR_WRITE);    if (mcp23018_status) goto out;
-        mcp23018_status = i2c_write(GPIOA);             if (mcp23018_status) goto out;
-        mcp23018_status = i2c_write(0xFF);              if (mcp23018_status) goto out;
-    out:
-        i2c_stop();
-    }
-
     // unselect on teensy
     // Hi-Z(DDR:0, PORT:0) to unselect
     DDRB  &= ~(1<<0 | 1<<1 | 1<<2 | 1<<3);
