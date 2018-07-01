@@ -144,9 +144,9 @@ uint8_t matrix_scan(void)
 
     uint32_t timer_now = timer_read32();
     if (TIMER_DIFF_32(timer_now, matrix_timer)>1000) {
-        debug("matrix scans per second: ");
-        debug_dec(matrix_scan_count);
-        debug("\n");
+        print("matrix scans per second: ");
+        print_dec(matrix_scan_count);
+        print("\n");
 
         matrix_timer = timer_now;
         matrix_scan_count = 0;
