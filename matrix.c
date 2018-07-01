@@ -115,7 +115,7 @@ uint8_t matrix_scan(void)
 
     uint32_t timer_now = timer_read32();
     if (TIMER_DIFF_32(timer_now, matrix_timer)>1000) {
-        print("matrix scan frequency: ");
+        print("matrix scans per second: ");
         pdec(matrix_scan_count);
         print("\n");
 
