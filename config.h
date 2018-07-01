@@ -28,10 +28,10 @@ Project located at <https://github.com/benblazak/ergodox-firmware>
 /* USB Device descriptor parameter */
 #define VENDOR_ID       0xFEED
 #define PRODUCT_ID      0x1307
-#define DEVICE_VER      0x0001
-#define MANUFACTURER    TMK/Cub
+#define DEVICE_VER      0x0002
+#define MANUFACTURER    TMK/fd0
 #define PRODUCT         Ergodox
-#define DESCRIPTION     t.m.k. keyboard firmware for Ergodox
+#define DESCRIPTION     keyboard firmware for Ergodox, mod by fd0
 
 #define MATRIX_ROWS 14
 #define MATRIX_COLS 6
