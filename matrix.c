@@ -234,11 +234,11 @@ uint8_t matrix_key_count(void)
  *
  * Teensy
  * col: 0   1   2   3   4   5
- * pin: F0  F1  F4  F5  F6  F7 
+ * pin: F0  F1  F4  F5  F6  F7
  *
  * MCP23018
  * col: 0   1   2   3   4   5
- * pin: B5  B4  B3  B2  B1  B0 
+ * pin: B5  B4  B3  B2  B1  B0
  */
 static void  init_cols(void)
 {
