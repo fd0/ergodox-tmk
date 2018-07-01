@@ -11,16 +11,6 @@
 
 #include <i2cmaster.h>
 
-
-/* define CPU frequency in Mhz here if not defined in Makefile */
-#ifndef F_CPU
-#define F_CPU 16000000UL
-#endif
-
-/* I2C clock in Hz */
-#define SCL_CLOCK  400000L
-
-
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
@@ -35,7 +25,11 @@ void i2c_init(void)
    */
   
   TWSR = 0;     /* no prescaler */
-  TWBR = 10;    /* must be >= 10 for stable operation */
+
+  // frequency = F_CPU/(16+2*TWBR) // without prescaler
+
+  // TWBR = 10;    /* ~444khz */
+  TWBR = 2;  // 800khz
 
 }/* i2c_init */
 
