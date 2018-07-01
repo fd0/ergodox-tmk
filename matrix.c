@@ -33,10 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include  "timer.h"
 #endif
 
-// matrix scan rate is around 1.3ms, this configures how many matrixs scans a
+// matrix scan rate is around 1ms, this configures how many matrixs scans a
 // key must have settled before a new state is accepted.
 #ifndef DEBOUNCE
-#   define DEBOUNCE 8
+#   define DEBOUNCE 10
 #endif
 
 #if DEBOUNCE < 1
@@ -55,6 +55,7 @@ static matrix_row_t read_cols(uint8_t row);
 static void init_cols(void);
 static void unselect_rows();
 static void select_row(uint8_t row);
+static matrix_row_t read_row_cols(uint8_t row);
 
 static uint8_t mcp23018_reset_loop;
 
@@ -157,9 +158,11 @@ uint8_t matrix_scan(void)
 
     matrix_row_t changes, mask;
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-        select_row(row);
+        // read cols for current row
+        matrix_row_t cols = read_row_cols(row);
+
         // read changed keys in current row
-        changes = matrix[row] ^ read_cols(row);
+        changes = matrix[row] ^ cols;
 
         // compute mask for debouncing for current row
         mask = ~matrix_debouncing[0][row];
@@ -251,35 +254,79 @@ static void  init_cols(void)
     PORTF |=  (1<<7 | 1<<6 | 1<<5 | 1<<4 | 1<<1 | 1<<0);
 }
 
-static matrix_row_t read_cols(uint8_t row)
-{
+static inline matrix_row_t read_row_cols(uint8_t row) {
+    // first rows are on the left side's mcp23018
     if (row < 7) {
+        // select on mcp23018
         if (mcp23018_status) { // if there was an error
             return 0;
         } else {
+            // set active row low  : 0
+            // set other rows hi-Z : 1
+            mcp23018_status = i2c_start(I2C_ADDR_WRITE);        if (mcp23018_status) goto out;
+            mcp23018_status = i2c_write(GPIOA);                 if (mcp23018_status) goto out;
+            mcp23018_status = i2c_write(~(1<<row));             if (mcp23018_status) goto out;
+
             uint8_t data = 0;
-            mcp23018_status = i2c_start(I2C_ADDR_WRITE);    if (mcp23018_status) goto out;
-            mcp23018_status = i2c_write(GPIOB);             if (mcp23018_status) goto out;
+            // restart and read data from GPIOB, probably because it was automatically selected due to BANK=0?
             mcp23018_status = i2c_start(I2C_ADDR_READ);     if (mcp23018_status) goto out;
+
+            // read only one byte of data
             data = i2c_readNak();
+
+            // invert the result
             data = ~data;
+
         out:
             i2c_stop();
             return data;
         }
-    } else {
-        // read input once
-        uint8_t v = PINF;
-        uint8_t result;
-
-        // lowest two bits are F0 and F1
-        result = (v & ( (1<<PINF0) | (1<<PINF1) ));
-
-        // bits 2-5 are F4-F7
-        result |= (( v & ( (1<<PINF4) | (1<<PINF5) | (1<<PINF6) | (1<<PINF7) )) >> 2);
-
-        return ~result;
     }
+
+    // other rows are directly attached to the controller
+    // Output low(DDR:1, PORT:0) to select
+    switch (row) {
+        case 7:
+            DDRB  |= (1<<0);
+            PORTB &= ~(1<<0);
+            break;
+        case 8:
+            DDRB  |= (1<<1);
+            PORTB &= ~(1<<1);
+            break;
+        case 9:
+            DDRB  |= (1<<2);
+            PORTB &= ~(1<<2);
+            break;
+        case 10:
+            DDRB  |= (1<<3);
+            PORTB &= ~(1<<3);
+            break;
+        case 11:
+            DDRD  |= (1<<2);
+            PORTD &= ~(1<<3);
+            break;
+        case 12:
+            DDRD  |= (1<<3);
+            PORTD &= ~(1<<3);
+            break;
+        case 13:
+            DDRC  |= (1<<6);
+            PORTC &= ~(1<<6);
+            break;
+    }
+
+    // read input once
+    uint8_t v = PINF;
+    uint8_t result;
+
+    // lowest two bits are F0 and F1
+    result = (v & ( (1<<PINF0) | (1<<PINF1) ));
+
+    // bits 2-5 are F4-F7
+    result |= (( v & ( (1<<PINF4) | (1<<PINF5) | (1<<PINF6) | (1<<PINF7) )) >> 2);
+
+    return ~result;
 }
 
 /* Row pin configuration
@@ -303,55 +350,3 @@ static void unselect_rows(void)
     DDRC  &= ~(1<<6);
     PORTC &= ~(1<<6);
 }
-
-static void select_row(uint8_t row)
-{
-    if (row < 7) {
-        // select on mcp23018
-        if (mcp23018_status) { // if there was an error
-            // do nothing
-        } else {
-            // set active row low  : 0
-            // set other rows hi-Z : 1
-            mcp23018_status = i2c_start(I2C_ADDR_WRITE);        if (mcp23018_status) goto out;
-            mcp23018_status = i2c_write(GPIOA);                 if (mcp23018_status) goto out;
-            mcp23018_status = i2c_write(~(1<<row));             if (mcp23018_status) goto out;
-        out:
-            i2c_stop();
-        }
-    } else {
-        // select on teensy
-        // Output low(DDR:1, PORT:0) to select
-        switch (row) {
-            case 7:
-                DDRB  |= (1<<0);
-                PORTB &= ~(1<<0);
-                break;
-            case 8:
-                DDRB  |= (1<<1);
-                PORTB &= ~(1<<1);
-                break;
-            case 9:
-                DDRB  |= (1<<2);
-                PORTB &= ~(1<<2);
-                break;
-            case 10:
-                DDRB  |= (1<<3);
-                PORTB &= ~(1<<3);
-                break;
-            case 11:
-                DDRD  |= (1<<2);
-                PORTD &= ~(1<<3);
-                break;
-            case 12:
-                DDRD  |= (1<<3);
-                PORTD &= ~(1<<3);
-                break;
-            case 13:
-                DDRC  |= (1<<6);
-                PORTC &= ~(1<<6);
-                break;
-        }
-    }
-}
-
