@@ -304,7 +304,7 @@ static inline matrix_row_t read_row_cols(uint8_t row) {
             break;
         case 11:
             DDRD  |= (1<<2);
-            PORTD &= ~(1<<3);
+            PORTD &= ~(1<<2);
             break;
         case 12:
             DDRD  |= (1<<3);
