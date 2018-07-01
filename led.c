@@ -54,3 +54,31 @@ void led_set(uint8_t usb_led)
         ergodox_right_led_3_off();
     }
 }
+
+void hook_layer_change(uint32_t new_layer) {
+    dprint("layer change to ");
+    debug_hex32(new_layer);
+    dprint("\n");
+
+    uint8_t layer = biton32(new_layer);
+
+    // use the leds 2 and 3 to show which layer is currently active
+    ergodox_board_led_off();
+    ergodox_right_led_2_off();
+    ergodox_right_led_3_off();
+    switch (layer) {
+        case 0:
+            // no leds
+            break;
+        case 1:
+            ergodox_right_led_3_on();
+            break;
+        case 2:
+            ergodox_right_led_2_on();
+            break;
+        case 3:
+            ergodox_right_led_2_on();
+            ergodox_right_led_3_on();
+            break;
+    }
+}

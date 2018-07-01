@@ -124,30 +124,6 @@ uint8_t matrix_scan(void)
     }
 #endif
 
-#ifdef SHOW_LAYER_LEDS
-    uint8_t layer = biton32(layer_state);
-
-    // use the leds 2 and 3 to show which layer is currently active
-    ergodox_board_led_off();
-    ergodox_right_led_2_off();
-    ergodox_right_led_3_off();
-    switch (layer) {
-        case 0:
-            // no leds
-            break;
-        case 1:
-            ergodox_right_led_3_on();
-            break;
-        case 2:
-            ergodox_right_led_2_on();
-            break;
-        case 3:
-            ergodox_right_led_2_on();
-            ergodox_right_led_3_on();
-            break;
-    }
-#endif
-
     for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
         select_row(i);
         matrix_row_t cols = read_cols(i);

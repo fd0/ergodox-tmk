@@ -58,9 +58,6 @@ Project located at <https://github.com/benblazak/ergodox-firmware>
 #define DEBOUNCE        1
 #define TAPPING_TERM    230
 
-// highlight current layer with LEDs
-#define SHOW_LAYER_LEDS
-
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */
 #define LOCKING_SUPPORT_ENABLE
 /* Locking resynchronize hack */
