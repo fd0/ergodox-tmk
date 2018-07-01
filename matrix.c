@@ -268,14 +268,17 @@ static matrix_row_t read_cols(uint8_t row)
             return data;
         }
     } else {
-        // read from teensy
-        return
-            (PINF&(1<<0) ? 0 : (1<<0)) |
-            (PINF&(1<<1) ? 0 : (1<<1)) |
-            (PINF&(1<<4) ? 0 : (1<<2)) |
-            (PINF&(1<<5) ? 0 : (1<<3)) |
-            (PINF&(1<<6) ? 0 : (1<<4)) |
-            (PINF&(1<<7) ? 0 : (1<<5)) ;
+        // read input once
+        uint8_t v = PINF;
+        uint8_t result;
+
+        // lowest two bits are F0 and F1
+        result = (v & ( (1<<PINF0) | (1<<PINF1) ));
+
+        // bits 2-5 are F4-F7
+        result |= (( v & ( (1<<PINF4) | (1<<PINF5) | (1<<PINF6) | (1<<PINF7) )) >> 2);
+
+        return ~result;
     }
 }
 
