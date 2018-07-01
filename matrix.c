@@ -33,14 +33,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include  "timer.h"
 #endif
 
+// matrix scan rate is usually between 2.8ms and 3.5ms, this configures how
+// many matrixs scans a key must have settled before a new state is accepted.
 #ifndef DEBOUNCE
-#   define DEBOUNCE	5
+#   define DEBOUNCE 3
 #endif
-static uint8_t debouncing = DEBOUNCE;
+
+#if DEBOUNCE < 1
+#   error "DEBOUNCE must be larger or equal 1"
+#endif
 
 /* matrix state(1:on, 0:off) */
 static matrix_row_t matrix[MATRIX_ROWS];
-static matrix_row_t matrix_debouncing[MATRIX_ROWS];
+bool matrix_changed;
+
+// matrix_debouncing is used to implement debouncing. If a bit is set, the key
+// has recently changed and needs to calm down first, so the change is ignored.
+static matrix_row_t matrix_debouncing[DEBOUNCE][MATRIX_ROWS];
 
 static matrix_row_t read_cols(uint8_t row);
 static void init_cols(void);
@@ -68,10 +77,8 @@ uint8_t matrix_cols(void)
 
 void matrix_init(void)
 {
-    debug_config.enable = true;
-    //debug_config.matrix = true;
-    //debug_config.keyboard = true;
-    print("matrix_init()\n");
+    //debug_config.enable = true;
+    //debug("matrix_init()\n");
 
     // initialize row and col
     init_ergodox();
@@ -84,13 +91,35 @@ void matrix_init(void)
     // initialize matrix state: all keys off
     for (uint8_t i=0; i < MATRIX_ROWS; i++) {
         matrix[i] = 0;
-        matrix_debouncing[i] = 0;
+    }
+
+    // initialize debouncing shadow copies
+    for (uint8_t d = 0; d < DEBOUNCE; d++) {
+        for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
+            matrix_debouncing[d][i] = 0;
+        }
     }
 
 #ifdef DEBUG_MATRIX_SCAN_RATE
     matrix_timer = timer_read32();
     matrix_scan_count = 0;
 #endif
+}
+
+inline static void advance_debouncing_matrix() {
+#if DEBOUNCE > 1
+    // advance debouncing shadow copies
+    for (uint8_t d = 0; d < DEBOUNCE-1; d++) {
+        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+            matrix_debouncing[d][row] = matrix_debouncing[d+1][row];
+        }
+    }
+#endif
+
+    // clear last debouncing matrix
+    for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
+        matrix_debouncing[DEBOUNCE-1][i] = 0;
+    }
 }
 
 uint8_t matrix_scan(void)
@@ -115,45 +144,59 @@ uint8_t matrix_scan(void)
 
     uint32_t timer_now = timer_read32();
     if (TIMER_DIFF_32(timer_now, matrix_timer)>1000) {
-        print("matrix scans per second: ");
-        pdec(matrix_scan_count);
-        print("\n");
+        debug("matrix scans per second: ");
+        debug_dec(matrix_scan_count);
+        debug("\n");
 
         matrix_timer = timer_now;
         matrix_scan_count = 0;
     }
 #endif
 
-    for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
-        select_row(i);
-        matrix_row_t cols = read_cols(i);
-        if (matrix_debouncing[i] != cols) {
-            matrix_debouncing[i] = cols;
-            if (debouncing) {
-                debug("bounce!: "); debug_hex(debouncing); debug("\n");
-            }
-            debouncing = DEBOUNCE;
+    matrix_changed = false;
+
+    matrix_row_t changes, mask;
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        select_row(row);
+        // read changed keys in current row
+        changes = matrix[row] ^ read_cols(row);
+
+        // compute mask for debouncing for current row
+        mask = ~matrix_debouncing[0][row];
+
+#ifdef DEBUG_BOUNCING
+        if (changes > 0 && (changes & mask) == 0) {
+            print("masked changes in row ");
+            print_hex8(row);
+            print(": ");
+            print_hex8(changes);
+            print(", demasked: ");
+            print_hex8(changes & mask);
+            print("\n");
         }
+#endif
+
+        // mask out keys that have changed recently, the bits are set it
+        // matrix_debouncing.
+        changes &= mask;
+
+        if (changes > 0) {
+            // apply changes to matrix
+            matrix[row] ^= changes;
+            matrix_changed = true;
+
+            // set bits in shadow matrixes
+            for (uint8_t d = 0; d < DEBOUNCE; d++) {
+                matrix_debouncing[d][row] |= changes;
+            }
+        }
+
         unselect_rows();
     }
 
-    if (debouncing) {
-        if (--debouncing) {
-            _delay_ms(1);
-        } else {
-            for (uint8_t i = 0; i < MATRIX_ROWS; i++) {
-                matrix[i] = matrix_debouncing[i];
-            }
-        }
-    }
+    advance_debouncing_matrix();
 
     return 1;
-}
-
-bool matrix_is_modified(void)
-{
-    if (debouncing) return false;
-    return true;
 }
 
 inline
@@ -170,10 +213,10 @@ matrix_row_t matrix_get_row(uint8_t row)
 
 void matrix_print(void)
 {
-    print("\nr/c 0123456789ABCDEF\n");
+    print("\nr 012345\n");
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         phex(row); print(": ");
-        pbin_reverse16(matrix_get_row(row));
+        print_bin_reverse8(matrix_get_row(row));
         print("\n");
     }
 }
@@ -225,7 +268,6 @@ static matrix_row_t read_cols(uint8_t row)
             return data;
         }
     } else {
-        _delay_us(30);  // without this wait read unstable value.
         // read from teensy
         return
             (PINF&(1<<0) ? 0 : (1<<0)) |

@@ -13,3 +13,4 @@ build/
 *.bak
 keymap_passwords.h
 keymap_passwords_cub.h
+__avrd_gdbinit
