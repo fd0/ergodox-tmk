@@ -121,34 +121,6 @@ NKRO_ENABLE ?= yes		# USB Nkey Rollover
 #OPT_DEFS += -DNO_ACTION_MACRO
 #OPT_DEFS += -DDEBUG_MATRIX_SCAN_RATE
 
-
-# Keymap file
-# KEYMAP_FILE = 
-# ifeq (yes,$(strip $(UNIMAP_ENABLE)))
-#     KEYMAP_FILE = unimap
-# else
-#     ifeq (yes,$(strip $(ACTIONMAP_ENABLE)))
-#         KEYMAP_FILE = actionmap
-#     else
-#         KEYMAP_FILE = keymap
-#     endif
-# endif
-# ifdef KEYMAP
-#     SRC := $(KEYMAP_FILE)_$(KEYMAP).c $(SRC)
-# else
-#     ifeq (yes,$(strip $(HHKB_JP)))
-#         SRC := $(KEYMAP_FILE)_jp.c $(SRC)
-#     else 
-#         SRC := $(KEYMAP_FILE)_hhkb.c $(SRC)
-#     endif
-# endif
-
-
-# ifneq (, $(or $(findstring keymap_jp.c, $(SRC)), $(findstring yes, $(HHKB_JP))))
-#     OPT_DEFS += -DHHKB_JP
-# endif
-
-
 # Search Path
 VPATH += $(TARGET_DIR)
 VPATH += $(TMK_DIR)
