@@ -76,7 +76,7 @@ uint8_t init_mcp23018(void) {
     if (i2c_initialized == 0) {
         i2c_init();  // on pins D(1,0)
         i2c_initialized++;
-        _delay_ms(1000);
+        _delay_ms(100);
     }
 
     // set pin direction
