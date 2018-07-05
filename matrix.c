@@ -45,7 +45,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* matrix state(1:on, 0:off) */
 static matrix_row_t matrix[MATRIX_ROWS];
-bool matrix_changed;
 
 // matrix_debouncing is used to implement debouncing. If a bit is set, the key
 // has recently changed and needs to calm down first, so the change is ignored.
@@ -154,8 +153,6 @@ uint8_t matrix_scan(void)
     }
 #endif
 
-    matrix_changed = false;
-
     matrix_row_t changes, mask;
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         // read cols for current row
@@ -186,7 +183,6 @@ uint8_t matrix_scan(void)
         if (changes > 0) {
             // apply changes to matrix
             matrix[row] ^= changes;
-            matrix_changed = true;
 
             // set bits in shadow matrixes
             for (uint8_t d = 0; d < DEBOUNCE; d++) {
