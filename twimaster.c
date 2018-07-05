@@ -28,8 +28,7 @@ void i2c_init(void)
 
   // frequency = F_CPU/(16+2*TWBR) // without prescaler
 
-  // TWBR = 10;    /* ~444khz */
-  TWBR = 2;  // 800khz
+  TWBR = 10;    /* ~444khz */
 
 }/* i2c_init */
 
