@@ -109,7 +109,7 @@ OPT_DEFS += -DBOOTLOADER_SIZE=4096
 #BOOTMAGIC_ENABLE ?= yes	# Virtual DIP switch configuration
 #MOUSEKEY_ENABLE ?= yes		# Mouse keys
 #EXTRAKEY_ENABLE ?= yes		# Audio control and System control
-CONSOLE_ENABLE ?= yes		# Console for debug
+#CONSOLE_ENABLE ?= yes		# Console for debug
 #COMMAND_ENABLE ?= yes    	# Commands for debug and configuration
 NKRO_ENABLE ?= yes		# USB Nkey Rollover
 #UNIMAP_ENABLE ?= yes		# Universal keymap
@@ -120,7 +120,7 @@ NKRO_ENABLE ?= yes		# USB Nkey Rollover
 #OPT_DEFS += -DNO_ACTION_LAYER
 #OPT_DEFS += -DNO_ACTION_MACRO
 #OPT_DEFS += -DDEBUG_MATRIX_SCAN_RATE
-OPT_DEFS += -DDEBUG_BOUNCING
+#OPT_DEFS += -DDEBUG_BOUNCING
 
 # Search Path
 VPATH += $(TARGET_DIR)
