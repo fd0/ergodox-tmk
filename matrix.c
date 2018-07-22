@@ -312,7 +312,8 @@ static inline matrix_row_t read_row_cols(uint8_t row) {
             break;
     }
 
-    // read input once
+    // read input once, after a brief delay
+    _delay_us(5);
     uint8_t v = PINF;
     uint8_t result;
 
